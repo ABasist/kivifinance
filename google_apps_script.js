@@ -13,63 +13,62 @@ function doPost(e) {
         var ss = SpreadsheetApp.getActiveSpreadsheet();
         var sheet = ss.getSheetByName(monthYear);
 
+        // 1. Якщо листа немає - створюємо
         if (!sheet) {
             sheet = ss.insertSheet(monthYear);
-            // Оновлений заголовок з колонкою "Коментар"
             sheet.appendRow(["Дата/Час", "Тип", "Регіон", "ПІБ", "Категорія/Програма", "Сума чек", "До виплати", "Коментар", "Посилання на PDF"]);
             sheet.getRange(1, 1, 1, 9).setFontWeight("bold").setBackground("#f3f3f3");
-            // Закріпити верхній рядок
             sheet.setFrozenRows(1);
+        } else {
+            // 2. Якщо лист є - перевіряємо чи є колонка "Коментар" (потрібно для переходу на нову версію)
+            var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+            if (headers.indexOf("Коментар") === -1) {
+                // Якщо колонки немає, додаємо її перед останньою колонкою (Посилання на PDF)
+                sheet.insertColumnBefore(sheet.getLastColumn());
+                sheet.getRange(1, sheet.getLastColumn() - 1).setValue("Коментар").setFontWeight("bold").setBackground("#f3f3f3");
+            }
         }
+
+        // Отримуємо актуальні заголовки після перевірки
+        var currentHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+        var commentColIdx = currentHeaders.indexOf("Коментар") + 1;
+        var pdfColIdx = currentHeaders.indexOf("Посилання на PDF") + 1;
 
         var fileUrl = "-";
         if (data.file && data.fileName) {
-            // 1. Отримуємо кореневу папку проекту
             var rootFolder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
-
-            // 2. Шукаємо або створюємо папку місяця (напр. "2-2026")
             var monthFolders = rootFolder.getFoldersByName(monthYear);
             var monthFolder = monthFolders.hasNext() ? monthFolders.next() : rootFolder.createFolder(monthYear);
-
-            // 3. Шукаємо або створюємо папку співробітника всередині місяця
             var userName = data.pib || data.name || "Unknown";
             var userFolders = monthFolder.getFoldersByName(userName);
             var userFolder = userFolders.hasNext() ? userFolders.next() : monthFolder.createFolder(userName);
-
-            // 4. Зберігаємо файл у папку співробітника
             var blob = Utilities.newBlob(Utilities.base64Decode(data.file), "application/pdf", data.fileName);
             var file = userFolder.createFile(blob);
             fileUrl = file.getUrl();
         }
 
-        // Запис у таблицю (додано data.comment)
+        // Підготовка рядка для запису
+        var rowData = new Array(currentHeaders.length).fill("-");
+        rowData[0] = new Date(); // Дата/Час
+        rowData[1] = data.type === 'COMPENSATION' ? "Компенсація" : "Витрати";
+        rowData[2] = data.region || "-";
+        rowData[3] = data.pib || data.name || "-";
+        rowData[4] = data.program || data.type || "-";
+
         if (data.type === 'COMPENSATION') {
-            sheet.appendRow([
-                new Date(),
-                "Компенсація",
-                data.region,
-                data.pib,
-                data.program,
-                data.checkAmount,
-                data.compensationAmount,
-                "-", // Коментар для компенсацій зазвичай порожній
-                fileUrl
-            ]);
+            rowData[5] = data.checkAmount;
+            rowData[6] = data.compensationAmount;
         } else {
-            sheet.appendRow([
-                new Date(),
-                "Витрати",
-                data.region,
-                data.name,
-                data.type,
-                data.amount,
-                "-",
-                data.comment || "-", // Ось сюди потрапляє коментар
-                "-"
-            ]);
+            rowData[5] = data.amount;
+            rowData[6] = "-";
         }
 
-        return ContentService.createTextOutput(JSON.stringify({ "status": "success", "url": fileUrl }))
+        if (commentColIdx > 0) rowData[commentColIdx - 1] = data.comment || "-";
+        if (pdfColIdx > 0) rowData[pdfColIdx - 1] = fileUrl;
+
+        sheet.appendRow(rowData);
+
+        return ContentService.createTextOutput(JSON.stringify({ "status": "success" }))
             .setMimeType(ContentService.MimeType.JSON);
 
     } catch (err) {

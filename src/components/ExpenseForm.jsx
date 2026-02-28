@@ -18,6 +18,12 @@ const ExpenseForm = ({ onAddEntry, setUserRegion }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        if (!formData.comment.trim()) {
+            alert('Будь ласка, заповніть деталі витрат (коментар)!');
+            return;
+        }
+
         const now = new Date();
         onAddEntry({
             ...formData,
