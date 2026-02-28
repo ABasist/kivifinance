@@ -71,7 +71,18 @@ const ExpenseForm = ({ onAddEntry, setUserRegion }) => {
                 />
             </div>
 
-            <button type="submit" className="submit-btn">Відправити</button>
+            <button
+                type="submit"
+                className="submit-btn"
+                disabled={!formData.name || !formData.type || !formData.amount || !formData.comment.trim()}
+                style={{
+                    opacity: (!formData.name || !formData.type || !formData.amount || !formData.comment.trim()) ? 0.3 : 1,
+                    cursor: (!formData.name || !formData.type || !formData.amount || !formData.comment.trim()) ? 'not-allowed' : 'pointer',
+                    background: (!formData.name || !formData.type || !formData.amount || !formData.comment.trim()) ? '#ccc' : 'var(--accent)'
+                }}
+            >
+                Відправити
+            </button>
         </form>
     );
 };
