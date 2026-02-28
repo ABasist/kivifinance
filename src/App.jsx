@@ -4,7 +4,7 @@ import ExpenseForm from './components/ExpenseForm';
 import CompensationForm from './components/CompensationForm';
 
 // ЗАМІНІТЬ ЦЕ НА ВАШ URL ПІСЛЯ РОЗГОРТАННЯ GOOGLE APPS SCRIPT
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwAYXlPRWHi_HELq-RRjsicdicgBZGhMz2AtgDoVOo2l5MbMyN96czI-WFQlcf-tEiX/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhqkkQpETFOJvsrL6y9ySgxuzvbgCt-wrntbvAbr5xPMwVKGMteXw98lJ5fo5x6OOmnQ/exec";
 
 function App() {
   const [activeTab, setActiveTab] = useState('expense');
@@ -49,7 +49,7 @@ function App() {
     <div className="app-container">
       <header>
         <div className="title-group">
-          <h1>KIVI Portal</h1>
+          <h1>KIVI Finance by Basist</h1>
           <p className="subtitle">Finance & Operations Control</p>
         </div>
         {userRegion && (
@@ -59,6 +59,15 @@ function App() {
           </div>
         )}
       </header>
+
+      <div className="info-block">
+        <div className="info-item">
+          <strong>📉 Витрати</strong> — 100% оплата компанією потреб бізнесу (нова пошта, таксі, KIVI TIME, навчання).
+        </div>
+        <div className="info-item">
+          <strong>🏥 Компенсації</strong> — часткове повернення коштів за витрати (KIVI в кожен дім, 50/50, Стоматологія 50/50) за наявності чека.
+        </div>
+      </div>
 
       <div className="card">
         <div className="tabs">
@@ -98,7 +107,7 @@ function App() {
       </div>
 
       <footer className="footer">
-        KIVI &bull; INTERNAL PURPOSE ONLY &bull; 2026
+        Developer by Anatolii Basist Tailored for KIVI - 2026
       </footer>
     </div>
   );

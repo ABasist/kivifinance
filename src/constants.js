@@ -23,6 +23,6 @@ export const EXPENSE_TYPES = [
 export const COMPENSATION_PROGRAMS = [
   { name: 'KIVI в кожен дім', rate: 0.5 },
   { name: '50/50', rate: 0.5 },
-  { name: '75/25 Стоматологія', rate: 0.75 },
-  { name: 'Інше (Своя форма)', rate: 1.0 }
+  { name: 'Стоматологія 50/50', rate: 0.5 },
+  { name: 'Інше (Своя форма)', rate: 0.5 }
 ];

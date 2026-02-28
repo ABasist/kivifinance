@@ -101,7 +101,18 @@ const CompensationForm = ({ onAddEntry, userRegion }) => {
                 <div className="calc-total">Разом: {calc.toFixed(2)} ₴</div>
             </div>
 
-            <button type="submit" className="submit-btn" disabled={!formData.file}>Надіслати</button>
+            <button
+                type="submit"
+                className="submit-btn"
+                disabled={!formData.file}
+                style={{
+                    opacity: !formData.file ? 0.3 : 1,
+                    cursor: !formData.file ? 'not-allowed' : 'pointer',
+                    background: !formData.file ? '#ccc' : 'var(--accent)'
+                }}
+            >
+                {formData.file ? 'Надіслати заявку' : 'Потрібно завантажити PDF'}
+            </button>
         </form>
     );
 };

@@ -21,6 +21,7 @@ const ExpenseForm = ({ onAddEntry, setUserRegion }) => {
         const now = new Date();
         onAddEntry({
             ...formData,
+            region: PERSONNEL_MAPPING[formData.name] || 'ОФІС/ІНШЕ',
             amount: parseFloat(formData.amount),
             id: Date.now(),
             timestamp: now.toISOString(),
@@ -60,12 +61,13 @@ const ExpenseForm = ({ onAddEntry, setUserRegion }) => {
             </div>
 
             <div className="form-group">
-                <label>Деталі (необов'язково)</label>
+                <label>Деталі (обов'язково)</label>
                 <textarea
                     value={formData.comment}
                     onChange={(e) => setFormData({ ...formData, comment: e.target.value })}
                     placeholder="Наприклад: обід з клієнтом"
                     rows="2"
+                    required
                 />
             </div>
 
