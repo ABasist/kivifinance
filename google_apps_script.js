@@ -1,67 +1,70 @@
-/**
- * Google Apps Script Backend for XpenseFlow Premium
- * UPDATED: Added Comment column support and region fix
- */
+var DRIVE_FOLDER_ID = '1R2hSM6ydEHmYjtT9RscEa72p8R_itBga';
 
-var DRIVE_FOLDER_ID = 'ВАШ_ID_ПАПКИ_DRIVE'; // ID папки для чеков
+function doGet() {
+    return ContentService.createTextOutput("KIVI Portal Backend: CONNECTED ✅");
+}
 
 function doPost(e) {
     try {
         var data = JSON.parse(e.postData.contents);
         var now = new Date();
-        var sheetName = (now.getMonth() + 1) + "-" + now.getFullYear();
+        var monthYear = (now.getMonth() + 1) + "-" + now.getFullYear();
 
         var ss = SpreadsheetApp.getActiveSpreadsheet();
-        var sheet = ss.getSheetByName(sheetName);
+        var sheet = ss.getSheetByName(monthYear);
 
-        // 1. Создание листа для текущего месяца, если его нет
         if (!sheet) {
-            sheet = ss.insertSheet(sheetName);
-            sheet.appendRow(["Дата/Час", "Тип", "Регіон", "ПІБ", "Категорія/Програма", "Сума", "Компенсація", "Деталі/Коментар", "Посилання на PDF"]);
-            // Закрепить верхнюю строку
-            sheet.setFrozenRows(1);
-            // Сделать заголовки жирными
+            sheet = ss.insertSheet(monthYear);
+            // Оновлений заголовок з колонкою "Коментар"
+            sheet.appendRow(["Дата/Час", "Тип", "Регіон", "ПІБ", "Категорія/Програма", "Сума чек", "До виплати", "Коментар", "Посилання на PDF"]);
             sheet.getRange(1, 1, 1, 9).setFontWeight("bold").setBackground("#f3f3f3");
+            // Закріпити верхній рядок
+            sheet.setFrozenRows(1);
         }
 
-        var fileUrl = "";
-
-        // 2. Обработка PDF файла
+        var fileUrl = "-";
         if (data.file && data.fileName) {
-            try {
-                var folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
-                var blob = Utilities.newBlob(Utilities.base64Decode(data.file), "application/pdf", data.fileName);
-                var file = folder.createFile(blob);
-                fileUrl = file.getUrl();
-            } catch (fErr) {
-                console.error("File upload failed: " + fErr);
-                fileUrl = "Помилка завантаження файлу";
-            }
+            // 1. Отримуємо кореневу папку проекту
+            var rootFolder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+
+            // 2. Шукаємо або створюємо папку місяця (напр. "2-2026")
+            var monthFolders = rootFolder.getFoldersByName(monthYear);
+            var monthFolder = monthFolders.hasNext() ? monthFolders.next() : rootFolder.createFolder(monthYear);
+
+            // 3. Шукаємо або створюємо папку співробітника всередині місяця
+            var userName = data.pib || data.name || "Unknown";
+            var userFolders = monthFolder.getFoldersByName(userName);
+            var userFolder = userFolders.hasNext() ? userFolders.next() : monthFolder.createFolder(userName);
+
+            // 4. Зберігаємо файл у папку співробітника
+            var blob = Utilities.newBlob(Utilities.base64Decode(data.file), "application/pdf", data.fileName);
+            var file = userFolder.createFile(blob);
+            fileUrl = file.getUrl();
         }
 
-        // 3. Запись данных
+        // Запис у таблицю (додано data.comment)
         if (data.type === 'COMPENSATION') {
             sheet.appendRow([
-                data.timestamp,
+                new Date(),
                 "Компенсація",
                 data.region,
                 data.pib,
                 data.program,
                 data.checkAmount,
                 data.compensationAmount,
-                "-", // Коментар відсутній у формі компенсацій
+                "-", // Коментар для компенсацій зазвичай порожній
                 fileUrl
             ]);
         } else {
             sheet.appendRow([
-                data.timestamp,
+                new Date(),
                 "Витрати",
                 data.region,
                 data.name,
                 data.type,
                 data.amount,
                 "-",
-                data.comment || "-",
+                data.comment || "-", // Ось сюди потрапляє коментар
                 "-"
             ]);
         }
