@@ -49,7 +49,7 @@ function App() {
     <div className="app-container">
       <header>
         <div className="title-group">
-          <h1>KIVI Finance by Basist</h1>
+          <h1>KIVI Finance v1.0.2</h1>
           <p className="subtitle">Finance & Operations Control</p>
         </div>
         {userRegion && (
