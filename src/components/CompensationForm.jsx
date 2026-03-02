@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { COMPENSATION_PROGRAMS } from '../constants';
 
-const CompensationForm = ({ onAddEntry, userRegion }) => {
+const CompensationForm = ({ onAddEntry, userRegion, setUserName, initialName }) => {
     const [formData, setFormData] = useState({
-        pib: '',
+        pib: initialName || '',
         program: '',
         checkAmount: '',
         file: null,
@@ -58,7 +58,10 @@ const CompensationForm = ({ onAddEntry, userRegion }) => {
                 <input
                     type="text"
                     value={formData.pib}
-                    onChange={(e) => setFormData({ ...formData, pib: e.target.value })}
+                    onChange={(e) => {
+                        setFormData({ ...formData, pib: e.target.value });
+                        setUserName(e.target.value);
+                    }}
                     placeholder="Введіть ПІБ вручну"
                     required
                 />

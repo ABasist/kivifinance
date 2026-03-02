@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import ExpenseForm from './components/ExpenseForm';
 import CompensationForm from './components/CompensationForm';
+import HistoryView from './components/HistoryView';
 
 // ЗАМІНІТЬ ЦЕ НА ВАШ URL ПІСЛЯ РОЗГОРТАННЯ GOOGLE APPS SCRIPT
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhqkkQpETFOJvsrL6y9ySgxuzvbgCt-wrntbvAbr5xPMwVKGMteXw98lJ5fo5x6OOmnQ/exec";
 
 function App() {
   const [activeTab, setActiveTab] = useState('expense');
+  const [userName, setUserName] = useState(() => localStorage.getItem('user_name') || '');
   const [userRegion, setUserRegion] = useState(() => localStorage.getItem('user_region'));
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -17,26 +19,31 @@ function App() {
     } else {
       localStorage.removeItem('user_region');
     }
-  }, [userRegion]);
+    if (userName) {
+      localStorage.setItem('user_name', userName);
+    } else {
+      localStorage.removeItem('user_name');
+    }
+  }, [userRegion, userName]);
 
   const addEntry = async (entry) => {
     setIsSubmitting(true);
     console.log('Відправка даних...', entry);
+    // Якщо ім'я не передано в entry, але є в стані App, додаємо його
+    const finalEntry = { ...entry, action: 'ADD' };
+    if (!finalEntry.pib && !finalEntry.name && userName) {
+      finalEntry.name = userName;
+    }
 
     try {
-      // Якщо URL не налаштовано, просто імітуємо успіх для тесту
-      if (SCRIPT_URL === "ВАШ_URL_СКРИПТА") {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        alert('Дані збережено локально (URL скрипта не налаштовано)');
-      } else {
-        const response = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors', // Важливо для Google Apps Script
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(entry)
-        });
-        alert('Дані успішно відправлено в Google Таблицю!');
-      }
+      const response = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors', // Важливо для Google Apps Script
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(finalEntry)
+      });
+      alert('Дані успішно відправлено в Google Таблицю!');
+      // Якщо це був доданий запис, можливо оновити історію пізніше
     } catch (error) {
       console.error('Помилка відправки:', error);
       alert('Помилка при відправці. Спробуйте ще раз.');
@@ -45,27 +52,38 @@ function App() {
     }
   };
 
+  const handleResetSession = () => {
+    setUserName('');
+    setUserRegion(null);
+  }
+
   return (
     <div className="app-container">
       <header>
         <div className="title-group">
-          <h1>KIVI Finance v1.1.0</h1>
+          <h1>KIVI Finance v1.2.0</h1>
           <p className="subtitle">Finance & Operations Control</p>
         </div>
-        {userRegion && (
+        {(userRegion || userName) && (
           <div className="region-badge">
-            <span className="region-label">{userRegion}</span>
-            <button className="change-btn" onClick={() => setUserRegion(null)}>Змінити</button>
+            <span className="region-label">{userRegion || '...'}</span>
+            <button className="change-btn" onClick={handleResetSession}>Змінити</button>
           </div>
         )}
       </header>
+
+      {userName && (
+        <div className="user-info-bar">
+          Ви увійшли як: <strong>{userName}</strong>
+        </div>
+      )}
 
       <div className="info-block">
         <div className="info-item">
           <strong>📉 Витрати</strong> — 100% оплата компанією потреб бізнесу (нова пошта, таксі, KIVI TIME, навчання).
         </div>
         <div className="info-item">
-          <strong>🏥 Компенсації</strong> — часткове повернення коштів за витрати (KIVI в кожен дім, 50/50, Стоматологія 50/50) за наявності чека.
+          <strong>🏥 Компенсації</strong> — часткове повернення коштів за витрати (KIVI в кожен дім, 50/50, Стоматологія 50/50).
         </div>
       </div>
 
@@ -85,6 +103,13 @@ function App() {
           >
             КОМПЕНСАЦІЇ
           </button>
+          <button
+            className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
+            onClick={() => setActiveTab('history')}
+            disabled={isSubmitting}
+          >
+            ІСТОРІЯ
+          </button>
         </div>
 
         <main>
@@ -96,10 +121,23 @@ function App() {
           ) : (
             <>
               {activeTab === 'expense' && (
-                <ExpenseForm onAddEntry={addEntry} setUserRegion={setUserRegion} />
+                <ExpenseForm
+                  onAddEntry={addEntry}
+                  setUserRegion={setUserRegion}
+                  setUserName={setUserName}
+                  initialName={userName}
+                />
               )}
               {activeTab === 'compensation' && (
-                <CompensationForm onAddEntry={addEntry} userRegion={userRegion} />
+                <CompensationForm
+                  onAddEntry={addEntry}
+                  userRegion={userRegion}
+                  setUserName={setUserName}
+                  initialName={userName}
+                />
+              )}
+              {activeTab === 'history' && (
+                <HistoryView SCRIPT_URL={SCRIPT_URL} userName={userName} />
               )}
             </>
           )}
@@ -107,10 +145,11 @@ function App() {
       </div>
 
       <footer className="footer">
-        Developer by Anatolii Basist Tailored for KIVI - 2026 (v1.1.0)
+        Developer by Anatolii Basist Tailored for KIVI - 2026 (v1.2.0)
       </footer>
     </div>
   );
 }
+
 
 export default App;

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { PERSONNEL, PERSONNEL_MAPPING, EXPENSE_TYPES } from '../constants';
 
-const ExpenseForm = ({ onAddEntry, setUserRegion }) => {
+const ExpenseForm = ({ onAddEntry, setUserRegion, setUserName, initialName }) => {
     const [formData, setFormData] = useState({
-        name: '',
+        name: initialName || '',
         amount: '',
         type: '',
         comment: ''
@@ -14,6 +14,7 @@ const ExpenseForm = ({ onAddEntry, setUserRegion }) => {
         const name = e.target.value;
         const region = PERSONNEL_MAPPING[name];
         if (region) setUserRegion(region);
+        setUserName(name);
         setFormData({ ...formData, name });
     };
 
