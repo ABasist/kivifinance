@@ -34,18 +34,43 @@ function doPost(e) {
         var commentColIdx = currentHeaders.indexOf("Коментар") + 1;
         var pdfColIdx = currentHeaders.indexOf("Посилання на PDF") + 1;
 
-        var fileUrl = "-";
-        if (data.file && data.fileName) {
+        var fileUrls = [];
+        var filesToProcess = [];
+
+        if (data.files && Array.isArray(data.files)) {
+            filesToProcess = data.files;
+        } else if (data.file && data.fileName) {
+            filesToProcess = [{
+                base64: data.file,
+                name: data.fileName,
+                type: "application/pdf"
+            }];
+        }
+
+        if (filesToProcess.length > 0) {
             var rootFolder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
-            var monthFolders = rootFolder.getFoldersByName(monthYear);
-            var monthFolder = monthFolders.hasNext() ? monthFolders.next() : rootFolder.createFolder(monthYear);
+
+            // Створюємо папку за типом (Витрати або Компенсації)
+            var typeName = data.type === 'COMPENSATION' ? "Компенсації" : "Витрати";
+            var typeFolders = rootFolder.getFoldersByName(typeName);
+            var typeFolder = typeFolders.hasNext() ? typeFolders.next() : rootFolder.createFolder(typeName);
+
+            var monthFolders = typeFolder.getFoldersByName(monthYear);
+            var monthFolder = monthFolders.hasNext() ? monthFolders.next() : typeFolder.createFolder(monthYear);
+
             var userName = data.pib || data.name || "Unknown";
             var userFolders = monthFolder.getFoldersByName(userName);
             var userFolder = userFolders.hasNext() ? userFolders.next() : monthFolder.createFolder(userName);
-            var blob = Utilities.newBlob(Utilities.base64Decode(data.file), "application/pdf", data.fileName);
-            var file = userFolder.createFile(blob);
-            fileUrl = file.getUrl();
+
+            filesToProcess.forEach(function (f) {
+                var mimeType = f.type || "application/pdf";
+                var blob = Utilities.newBlob(Utilities.base64Decode(f.base64), mimeType, f.name);
+                var file = userFolder.createFile(blob);
+                fileUrls.push(file.getUrl());
+            });
         }
+
+        var fileUrl = fileUrls.length > 0 ? fileUrls.join(", ") : "-";
 
         // Підготовка рядка для запису
         var rowData = new Array(currentHeaders.length).fill("-");

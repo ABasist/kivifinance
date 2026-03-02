@@ -49,7 +49,7 @@ function App() {
     <div className="app-container">
       <header>
         <div className="title-group">
-          <h1>KIVI Finance v1.0.2</h1>
+          <h1>KIVI Finance v1.1.0</h1>
           <p className="subtitle">Finance & Operations Control</p>
         </div>
         {userRegion && (
@@ -107,7 +107,7 @@ function App() {
       </div>
 
       <footer className="footer">
-        Developer by Anatolii Basist Tailored for KIVI - 2026
+        Developer by Anatolii Basist Tailored for KIVI - 2026 (v1.1.0)
       </footer>
     </div>
   );

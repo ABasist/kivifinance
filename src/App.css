@@ -200,6 +200,47 @@ select:focus {
   cursor: pointer;
 }
 
+.file-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.file-list {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.file-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f0f0f5;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.file-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.remove-file {
+  background: none;
+  border: none;
+  color: #ff3b30;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 4px;
+}
+
 .calc-preview {
   background: #f8f8f8;
   padding: 14px;

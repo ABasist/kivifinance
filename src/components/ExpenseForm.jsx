@@ -8,12 +8,38 @@ const ExpenseForm = ({ onAddEntry, setUserRegion }) => {
         type: '',
         comment: ''
     });
+    const [files, setFiles] = useState([]);
 
     const handleNameChange = (e) => {
         const name = e.target.value;
         const region = PERSONNEL_MAPPING[name];
         if (region) setUserRegion(region);
         setFormData({ ...formData, name });
+    };
+
+    const handleFiles = (e) => {
+        const selectedFiles = Array.from(e.target.files);
+        const filePromises = selectedFiles.map(file => {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    resolve({
+                        base64: reader.result.split(',')[1],
+                        name: file.name,
+                        type: file.type
+                    });
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        Promise.all(filePromises).then(processedFiles => {
+            setFiles(prev => [...prev, ...processedFiles]);
+        });
+    };
+
+    const removeFile = (index) => {
+        setFiles(files.filter((_, i) => i !== index));
     };
 
     const handleSubmit = (e) => {
@@ -31,9 +57,11 @@ const ExpenseForm = ({ onAddEntry, setUserRegion }) => {
             amount: parseFloat(formData.amount),
             id: Date.now(),
             timestamp: now.toISOString(),
-            monthYear: `${now.getMonth() + 1}-${now.getFullYear()}`
+            monthYear: `${now.getMonth() + 1}-${now.getFullYear()}`,
+            files: files // Передаємо масив файлів
         });
         setFormData({ name: '', amount: '', type: '', comment: '' });
+        setFiles([]);
         alert('Готово! Дані надіслано.');
     };
 
@@ -75,6 +103,33 @@ const ExpenseForm = ({ onAddEntry, setUserRegion }) => {
                     rows="2"
                     required
                 />
+            </div>
+
+            <div className="form-group">
+                <label>Прикріпити чеки (можна декілька)</label>
+                <div className="file-input-wrapper">
+                    <input
+                        type="file"
+                        accept="image/*,application/pdf"
+                        multiple
+                        onChange={handleFiles}
+                        id="expense-files"
+                        style={{ display: 'none' }}
+                    />
+                    <label htmlFor="expense-files" className="file-label">
+                        <span>📎 Оберіть файли</span>
+                    </label>
+                </div>
+                {files.length > 0 && (
+                    <div className="file-list">
+                        {files.map((file, index) => (
+                            <div key={index} className="file-item">
+                                <span className="file-name">{file.name}</span>
+                                <button type="button" onClick={() => removeFile(index)} className="remove-file">✕</button>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
 
             <button
