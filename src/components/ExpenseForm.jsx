@@ -50,6 +50,10 @@ const ExpenseForm = ({ onAddEntry, setUserRegion, setUserName, initialName }) =>
             alert('Будь ласка, заповніть деталі витрат (коментар)!');
             return;
         }
+        if (files.length === 0) {
+            alert('Будь ласка, прикріпіть чек!');
+            return;
+        }
 
         const now = new Date();
         onAddEntry({
@@ -107,7 +111,7 @@ const ExpenseForm = ({ onAddEntry, setUserRegion, setUserName, initialName }) =>
             </div>
 
             <div className="form-group">
-                <label>Прикріпити чеки (можна декілька)</label>
+                <label>Прикріпити чеки (обов'язково, можна декілька)</label>
                 <div className="file-input-wrapper">
                     <input
                         type="file"
@@ -136,11 +140,11 @@ const ExpenseForm = ({ onAddEntry, setUserRegion, setUserName, initialName }) =>
             <button
                 type="submit"
                 className="submit-btn"
-                disabled={!formData.name || !formData.type || !formData.amount || !formData.comment.trim()}
+                disabled={!formData.name || !formData.type || !formData.amount || !formData.comment.trim() || files.length === 0}
                 style={{
-                    opacity: (!formData.name || !formData.type || !formData.amount || !formData.comment.trim()) ? 0.3 : 1,
-                    cursor: (!formData.name || !formData.type || !formData.amount || !formData.comment.trim()) ? 'not-allowed' : 'pointer',
-                    background: (!formData.name || !formData.type || !formData.amount || !formData.comment.trim()) ? '#ccc' : 'var(--accent)'
+                    opacity: (!formData.name || !formData.type || !formData.amount || !formData.comment.trim() || files.length === 0) ? 0.3 : 1,
+                    cursor: (!formData.name || !formData.type || !formData.amount || !formData.comment.trim() || files.length === 0) ? 'not-allowed' : 'pointer',
+                    background: (!formData.name || !formData.type || !formData.amount || !formData.comment.trim() || files.length === 0) ? '#ccc' : 'var(--accent)'
                 }}
             >
                 Відправити
