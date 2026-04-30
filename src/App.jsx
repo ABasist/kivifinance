@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import ExpenseForm from './components/ExpenseForm';
-import CompensationForm from './components/CompensationForm';
+
 import HistoryView from './components/HistoryView';
+import TargetsPlanner from './components/TargetsPlanner';
 
 // ЗАМІНІТЬ ЦЕ НА ВАШ URL ПІСЛЯ РОЗГОРТАННЯ GOOGLE APPS SCRIPT
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhqkkQpETFOJvsrL6y9ySgxuzvbgCt-wrntbvAbr5xPMwVKGMteXw98lJ5fo5x6OOmnQ/exec";
@@ -82,9 +83,7 @@ function App() {
         <div className="info-item">
           <strong>📉 Витрати</strong> — 100% оплата компанією потреб бізнесу (нова пошта, таксі, KIVI TIME, навчання).
         </div>
-        <div className="info-item">
-          <strong>🏥 Компенсації</strong> — часткове повернення коштів за витрати (KIVI в кожен дім).
-        </div>
+
       </div>
 
       <div className="card">
@@ -96,19 +95,20 @@ function App() {
           >
             ВИТРАТИ
           </button>
-          <button
-            className={`tab-btn ${activeTab === 'compensation' ? 'active' : ''}`}
-            onClick={() => setActiveTab('compensation')}
-            disabled={isSubmitting}
-          >
-            КОМПЕНСАЦІЇ
-          </button>
+
           <button
             className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
             onClick={() => setActiveTab('history')}
             disabled={isSubmitting}
           >
             ІСТОРІЯ
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'targets' ? 'active' : ''}`}
+            onClick={() => setActiveTab('targets')}
+            disabled={isSubmitting}
+          >
+            ПЛАНИ
           </button>
         </div>
 
@@ -128,16 +128,12 @@ function App() {
                   initialName={userName}
                 />
               )}
-              {activeTab === 'compensation' && (
-                <CompensationForm
-                  onAddEntry={addEntry}
-                  userRegion={userRegion}
-                  setUserName={setUserName}
-                  initialName={userName}
-                />
-              )}
+
               {activeTab === 'history' && (
                 <HistoryView SCRIPT_URL={SCRIPT_URL} userName={userName} />
+              )}
+              {activeTab === 'targets' && (
+                <TargetsPlanner userName={userName} />
               )}
             </>
           )}

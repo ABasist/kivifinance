@@ -32,16 +32,7 @@ const SummaryDashboard = ({ entries }) => {
                 </div>
             </div>
 
-            <div className="summary-card" style={{ borderLeft: '4px solid var(--success)' }}>
-                <h3 style={{ marginBottom: '15px', color: 'var(--success)' }}>Компенсації (Всього)</h3>
-                <div className="stat-item">
-                    <span className="stat-label">Загальна сума до виплати</span>
-                    <span className="stat-value">{totalComp.toLocaleString()} ₴</span>
-                </div>
-                <div style={{ marginTop: '10px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                    Кількість заявок: {compEntries.length}
-                </div>
-            </div>
+
 
             <div className="summary-card">
                 <h3 style={{ marginBottom: '15px' }}>Останні записи</h3>
