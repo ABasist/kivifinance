@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; // Updated: 2026-04-30 10:45
 import './App.css';
 import ExpenseForm from './components/ExpenseForm';
 
 import HistoryView from './components/HistoryView';
-import TargetsPlanner from './components/TargetsPlanner';
+
 
 // ЗАМІНІТЬ ЦЕ НА ВАШ URL ПІСЛЯ РОЗГОРТАННЯ GOOGLE APPS SCRIPT
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhqkkQpETFOJvsrL6y9ySgxuzvbgCt-wrntbvAbr5xPMwVKGMteXw98lJ5fo5x6OOmnQ/exec";
@@ -13,6 +13,7 @@ function App() {
   const [userName, setUserName] = useState(() => localStorage.getItem('user_name') || '');
   const [userRegion, setUserRegion] = useState(() => localStorage.getItem('user_region'));
   const [isSubmitting, setIsSubmitting] = useState(false);
+  console.log('App version 1.2.1 loaded');
 
   useEffect(() => {
     if (userRegion) {
@@ -103,13 +104,7 @@ function App() {
           >
             ІСТОРІЯ
           </button>
-          <button
-            className={`tab-btn ${activeTab === 'targets' ? 'active' : ''}`}
-            onClick={() => setActiveTab('targets')}
-            disabled={isSubmitting}
-          >
-            ПЛАНИ
-          </button>
+
         </div>
 
         <main>
@@ -132,9 +127,7 @@ function App() {
               {activeTab === 'history' && (
                 <HistoryView SCRIPT_URL={SCRIPT_URL} userName={userName} />
               )}
-              {activeTab === 'targets' && (
-                <TargetsPlanner userName={userName} />
-              )}
+
             </>
           )}
         </main>
